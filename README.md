@@ -2,7 +2,7 @@
 
 ## Requirements
 - Ansible: =>2.17.1
-- Ubuntu >=22.04 (as a target machine)
+- Ubuntu >= 22.04 (as a target machine)
 
 The workload has been tested running from a Mac machine running against a remote Ubuntu server,
 acting as a "local" machine, due to resource constraints and Gaia node requirements."
