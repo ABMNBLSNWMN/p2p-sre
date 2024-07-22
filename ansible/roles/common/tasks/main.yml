@@ -1,0 +1,139 @@
+##########
+# Common #
+##########
+- name: Update all packages
+  become: yes
+  apt:
+    update_cache: yes
+    upgrade: dist
+
+##########
+# Python #
+##########
+- name: Ensure python3-pip is installed
+  become: yes
+  apt:
+    name: python3-pip
+    state: present
+
+- name: Install specific Python packages
+  become: yes
+  ansible.builtin.pip:
+    name:
+      - kubernetes==24.2.0
+      - PyYAML>=3.11
+      - jsonpatch
+    break_system_packages: true
+    executable: pip3
+
+##########
+# Docker #
+##########
+- name: Install necessary packages for Docker
+  become: yes
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+      - gnupg
+    state: present
+    update_cache: yes
+
+- name: Add Docker GPG key
+  become: yes
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker APT repository
+  become: yes
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
+    state: present
+
+- name: Install Docker
+  become: yes
+  apt:
+    name: 
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+    update_cache: yes
+
+- name: Start and enable docker daemon
+  become: yes
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Ensure user is in the group
+  become: yes
+  user:
+    name: ubuntu
+    groups: docker
+    append: yes
+
+- name: Restart Docker
+  become: yes
+  service:
+    name: docker
+    state: restarted
+
+###########
+# Kubectl #
+###########
+- name: Import Kubernetes GPG key
+  become: yes
+  apt_key:
+    url: https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key
+    state: present
+
+- name: Add Kubernetes APT repository
+  become: yes
+  apt_repository:
+    repo: "deb https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /"
+    state: present
+
+- name: Install kubectl
+  become: yes
+  apt:
+    name: kubectl
+    state: present
+    update_cache: yes
+
+########
+# Helm #
+########
+- name: Add Helm GPG key
+  become: yes
+  get_url:
+    url: https://baltocdn.com/helm/signing.asc
+    dest: /tmp/helm-signing.asc
+
+- name: Import Helm GPG key
+  become: yes
+  apt_key:
+    url: https://baltocdn.com/helm/signing.asc
+    state: present
+
+- name: Add Helm APT repository
+  become: yes
+  apt_repository:
+    repo: "deb [arch=amd64] https://baltocdn.com/helm/stable/debian/ all main"
+    state: present
+    filename: helm-stable
+    update_cache: yes
+
+- name: Install Helm
+  become: yes
+  apt:
+    name: helm
+    state: present
+    update_cache: yes
+

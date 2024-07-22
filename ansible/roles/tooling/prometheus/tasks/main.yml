@@ -1,0 +1,5 @@
+---
+- name: Create a prometheus app
+  kubernetes.core.k8s:
+    state: present
+    template: ../templates/prometheus.yml

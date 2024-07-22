@@ -1,0 +1,5 @@
+---
+- name: Create an argocd app
+  kubernetes.core.k8s:
+    state: present
+    template: ../templates/argo-node.yml

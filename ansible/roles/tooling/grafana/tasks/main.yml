@@ -1,0 +1,5 @@
+---
+- name: Create a grafana app
+  kubernetes.core.k8s:
+    state: present
+    template: ../templates/grafana.yml

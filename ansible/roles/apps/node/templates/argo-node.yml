@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: testnet-node
+  namespace: argo
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/ABMNBLSNWMN/p2p-sre.git
+    path: apps/cosmos-chains/gaia-theta-testnet-001
+    targetRevision: HEAD
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+

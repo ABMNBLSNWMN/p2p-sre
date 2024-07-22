@@ -1,0 +1,7 @@
+- name: Include the Galaxy role
+  import_role:
+    name: gantsign.minikube
+
+- name: Start minikube
+  command: minikube start --driver=docker
+

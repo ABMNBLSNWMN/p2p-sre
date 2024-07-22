@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: gaia-testnet
+  labels:
+    app: gaia-testnet
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /metrics
+    prometheus.io/port: "26660"
+spec:
+  serviceName: "gaia-testnet"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gaia-testnet
+  template:
+    metadata:
+      labels:
+        app: gaia-testnet
+    spec:
+      initContainers:
+      - name: init-config
+        image: alpine:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          wget -O /tmp/genesis.json.gz https://github.com/cosmos/testnets/raw/master/release/genesis.json.gz && \
+          gzip -v -d /tmp/genesis.json.gz && \
+          mkdir -v -p /mnt/gaia/config && \
+          mv -v /tmp/genesis.json /mnt/gaia/config/genesis.json && \
+          cp -v /configmaps/config.toml /mnt/gaia/config/config.toml && \
+          cp -v /configmaps/app.toml /mnt/gaia/config/app.toml && \
+          chown -v -R 1025:1025 /mnt/gaia
+        volumeMounts:
+        - name: gaia
+          mountPath: /mnt/gaia
+        - name: configmap-mounts
+          mountPath: /configmaps
+      containers:
+      - name: gaia
+        image: ghcr.io/cosmos/gaia:main
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 26656
+          - containerPort: 26660
+        volumeMounts:
+          - name: gaia
+            mountPath: /home/nonroot/.gaia
+      volumes:
+      - name: configmap-mounts
+        configMap:
+          name: gaia-configtomls
+      - name: gaia
+        persistentVolumeClaim:
+          claimName: gaia
+  volumeClaimTemplates:
+  - metadata:
+      name: gaia
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 100Gi
+

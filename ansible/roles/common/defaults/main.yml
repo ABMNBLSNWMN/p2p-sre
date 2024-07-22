@@ -1,0 +1,3 @@
+# Default values for common role
+docker_version: "24.0.7"
+

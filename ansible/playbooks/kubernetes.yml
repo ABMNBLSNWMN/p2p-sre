@@ -1,0 +1,6 @@
+- hosts: all
+  roles:
+    - argocd
+    - apps/node
+    - tooling/prometheus
+    - tooling/grafana
